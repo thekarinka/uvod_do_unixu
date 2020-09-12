@@ -13,25 +13,25 @@ if [ ! $dir ]; then
 	dir="."
 fi
 
-
 list=($(ls -l $dir | awk 'NR != 1 {print $9}'))
 
 recognize(){
-	echo $1
-	if [[ $1 == `echo "$1" | grep -Pe "^([^[:lower:]])+$"` ]]; then
+#	echo $1
+#	echo $2
+	if [[ $1 == `echo "$1" | grep -Pe "(^|\/)([^[:lower:]])+$"` ]]; then
 		if [[ $2 != "r" ]]; then
-			echo "return =r"
+#			echo "return =r"
 			return 0
 		fi
-		echo "velka pismena"
-		newName=`echo "$1" | awk '{print tolower($0)}'`
-	elif [[ $1 == `echo "$1" | grep -Pe "^([^[:upper:]])+$"` ]]; then
+#		echo "velka pismena"
+		newName=`echo "$1" | awk -F/ '{OFS="/";filename=tolower($NF);NF--;printf $0; printf "/"; print filename}'`
+	elif [[ $1 == `echo "$1" | grep -Pe "(^|\/)([^[:upper:]])+$"` ]]; then
 		if [[ $2 == "r" ]]; then
-			echo "return !r"
+#			echo "return !r"
 			return 0
 		 fi
-		echo "mala pismena"
-		newName=`echo "$1" | awk '{print toupper($0)}'`
+#		echo "mala pismena"
+		newName=`echo "$1" | awk -F/ '{OFS="/";filename=toupper($NF);NF--;printf $0; printf "/"; print filename}'`
 	else
 		return 0
 	fi
@@ -42,7 +42,7 @@ recognize(){
 		mv $1 $newName
 	fi
 
-	echo $newName
+#	echo $newName
 
 	return 0
 }
@@ -56,4 +56,4 @@ recognize(){
 #recognize ${list[0]} $r
 
 export -f recognize
-find $dir -depth -type d -o -type f -exec bash -c 'recognize "{}" $r' \;
+find $dir -depth -type d -o -type f -exec bash -c 'recognize "{}" '"$r" \;
