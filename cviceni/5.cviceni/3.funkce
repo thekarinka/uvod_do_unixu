@@ -1,0 +1,11 @@
+func(){
+	# parametry:
+	# $1, ...
+	
+	# funkce musí vracet číslo
+	return 0
+}
+
+# pokud chceme aby vracela text musíme ho vypsat přes echo
+# a funkci zavoláme (a do varu se uloží to co bylo echováno):
+# var = `func`
