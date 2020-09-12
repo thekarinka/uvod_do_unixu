@@ -9,4 +9,4 @@ cut -d \; -f 1 countrycodes_en.csv | tr -d '"' | sort > sorted/countrycodes_en.c
 
 join -t: sorted/countrycodes_en.csv sorted/kodyzemi_cz.csv
 
-#rm -rf sorted
+rm -rf sorted
