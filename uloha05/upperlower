@@ -17,39 +17,43 @@ fi
 list=($(ls -l $dir | awk 'NR != 1 {print $9}'))
 
 recognize(){
-	if [[ ${list[0]} == `echo "${list[0]}" | grep -Pe "^([^[:lower:]])+$"` ]]; then
-		if [[ $2 == "r" ]]; then
+	echo $1
+	if [[ $1 == `echo "$1" | grep -Pe "^([^[:lower:]])+$"` ]]; then
+		if [[ $2 != "r" ]]; then
 			echo "return =r"
 			return 0
 		fi
-#		echo "velka pismena"
+		echo "velka pismena"
 		newName=`echo "$1" | awk '{print tolower($0)}'`
-	elif [[ ${list[0]} == `echo "${list[0]}" | grep -Pe "^([^[:upper:]])+$"` ]] && [[ "$2" = "r" ]]; then
-		if [[ $2 != "r" ]]; then
+	elif [[ $1 == `echo "$1" | grep -Pe "^([^[:upper:]])+$"` ]]; then
+		if [[ $2 == "r" ]]; then
 			echo "return !r"
 			return 0
 		 fi
-#		echo "mala pismena"
+		echo "mala pismena"
 		newName=`echo "$1" | awk '{print toupper($0)}'`
 	else
 		return 0
 	fi
 
 	if [ -f $newName ]; then
-		>&2 echo "error - už zde existuje $newName"
+		>&2 echo "error - $1 už zde existuje $newName"
 	else
 		mv $1 $newName
 	fi
 
-#	echo $newName
+	echo $newName
 
 	return 0
 }
 
 
-for i in ${list[@]}; do
-	recognize $i $r
+#for i in ${list[@]}; do
+#	recognize $i $r
 #	echo $i
-done
+#done
 
 #recognize ${list[0]} $r
+
+export -f recognize
+find $dir -depth -type d -o -type f -exec bash -c 'recognize "{}" $r' \;
