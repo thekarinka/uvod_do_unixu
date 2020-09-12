@@ -1,37 +1,55 @@
 #!/bin/sh
 
-list=($(ls -l | awk 'NR != 1 {print $9}'))
+for i in "$@"; do
+	if [ "$i" == "-r" ]; then
+		r="r"
+	fi
+	if [ "$i" != "-r" ]; then
+		dir="$i"
+	fi
+done
 
-#echo ${list[0]}
+if [ ! $dir ]; then
+	dir="."
+fi
+
+
+list=($(ls -l $dir | awk 'NR != 1 {print $9}'))
 
 recognize(){
-	if [[ ${list[0]} == `echo "${list[0]}" | ggrep -Pe "^([^[:lower:]])+$"` ]]; then
+	if [[ ${list[0]} == `echo "${list[0]}" | grep -Pe "^([^[:lower:]])+$"` ]]; then
 		if [[ $2 == "r" ]]; then
 			echo "return =r"
 			return 0
 		fi
-		echo "velka pismena"
+#		echo "velka pismena"
 		newName=`echo "$1" | awk '{print tolower($0)}'`
-	elif [[ ${list[0]} == `echo "${list[0]}" | ggrep -Pe "^([^[:upper:]])+$"` ]] && [[ "$2" = "r" ]]; then
-		if [[ $2 != "r" ]]; then 
+	elif [[ ${list[0]} == `echo "${list[0]}" | grep -Pe "^([^[:upper:]])+$"` ]] && [[ "$2" = "r" ]]; then
+		if [[ $2 != "r" ]]; then
 			echo "return !r"
 			return 0
 		 fi
-		echo "mala pismena"
-		newName=`echo "$1" | awk '{print toupper($0)}'`		
+#		echo "mala pismena"
+		newName=`echo "$1" | awk '{print toupper($0)}'`
 	else
 		return 0
 	fi
-	
+
 	if [ -f $newName ]; then
-    		echo the file exists
+		>&2 echo "error - už zde existuje $newName"
 	else
 		mv $1 $newName
 	fi
-	
-	echo $newName
-	
+
+#	echo $newName
+
 	return 0
 }
 
-echo `recognize ${list[0]} n`
+
+for i in ${list[@]}; do
+	recognize $i $r
+#	echo $i
+done
+
+#recognize ${list[0]} $r
