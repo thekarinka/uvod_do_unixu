@@ -5,9 +5,9 @@ BCK_COLOR="\033[40m"
 O_FOREGROUND_COLOR="\\033[32m"
 X_FOREGROUND_COLOR="\\033[33m"
 
-sirka=8
-vyska=8
-pocetPiskvorek=4
+sirka=${1:-"10"}
+vyska=${2:-"10"}
+pocetPiskvorek=${3:-"4"}
 hracX=1
 hracY=1
 
@@ -105,10 +105,22 @@ printPlocha() {
 		printf "*\n"
 		radekHvezdicek $((4*$sirka+1))
 	done
+	printf "Hraje hráč $hrac\n"
+}
+
+konec() {
+	read
+	if [ -t 0 ] ; then
+		:
+	else
+		stty echo
+	fi
+	exit 0
 }
 
 
 # main loop
+tput civis; trap "tput reset" EXIT
 stty -echo
 printf $BCK_COLOR$FOREGROUND_COLOR
 clear
@@ -116,8 +128,7 @@ printPlocha
 while read -rn1 znak; do
 	case $znak in
 		"Q"|"q"*)
-			stty echo
-			exit 0
+			konec
 		;;
 		"D"|"d"*)
 			#echo "šipka vpravo"
@@ -146,8 +157,7 @@ while read -rn1 znak; do
 					echo "Vyhrál hráč s $hrac"
 					echo "Stiskněte Enter"
 					read
-					stty echo
-					exit 0
+					konec
 				fi
 				switchSymbol
 			fi
@@ -156,4 +166,4 @@ while read -rn1 znak; do
 	clear
 	printPlocha
 done
-stty echo
+#konec
