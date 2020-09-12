@@ -1,0 +1,27 @@
+#!/bin/sh
+
+promenna=4
+promenna="první řádek
+druhý řádek"
+
+if true
+then
+	echo Ahoj
+elif false
+then
+	echo Ahoj 2
+else
+	echo Ahoj 3
+fi
+
+# přechod na nový řádek jde nahradit jako ;
+
+if true; then
+	echo Ahoj
+elif false; then
+	echo Ahoj 2
+else
+	echo Ahoj 3
+fi
+
+exit 0

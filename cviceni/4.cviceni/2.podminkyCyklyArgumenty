@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# $$ id procesu
+# $! id naposledy spuštěného procesu?
+
+echo "$@"
+echo "$*"
+
+if [ ! -e "$1" ]; then
+#if [ "$1" -gt 10 ]; then
+	echo Ahoj
+elif false; then
+	echo Ahoj 2
+else
+	echo Ahoj 3
+fi
+
+
+# otestovat s parametry a "b c" d
+echo "Prvni cyklus"
+for i in "$*"; do
+	echo "$i"
+done
+
+echo "Druhy cyklus"
+for i in "$@"; do
+	echo "$i"
+done
+
+exit 0
