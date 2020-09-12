@@ -1,0 +1,6 @@
+#!/bin/sh
+
+for link in `./moj-wget -O - http://slovnik.azet.sk/slovnik-cudzich-slov/m/1 | grep -oe "<a href=/slovnik-cudzich-slov/?q[^>]*" | cut -c 9-`; do
+	echo https://slovnik.azet.sk$link
+done
+exit 15

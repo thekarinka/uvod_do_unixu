@@ -27,4 +27,11 @@ for i in "$@"; do
 	echo "$i"
 done
 
+shift # vymaže jeden argument
+shift 2 # vymaže dva argumenty
+echo Argumenty teď: "$@"
+
+echo `echo 3`
+
+
 exit 0

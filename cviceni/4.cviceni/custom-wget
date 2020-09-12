@@ -1,0 +1,3 @@
+#!/bin/sh
+
+wget --user-agent="Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0" -o - http://slovnik.azet.sk/slovnik-cudzich-slov/m/1

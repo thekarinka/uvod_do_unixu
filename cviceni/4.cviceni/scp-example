@@ -1,0 +1,3 @@
+#!/bin/sh
+
+scp u2-0:/tmp/moj-wget .
