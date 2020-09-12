@@ -1,22 +1,22 @@
 #!/bin/sh
 
-sirka=10
-vyska=10
+sirka=8
+vyska=8
 
-hracX=0
-hracY=0
+hracX=1
+hracY=1
 
-policko1_1="S"
+hrac="X"
 
-# param: $1 - sirka, $2 - vyska
-init() {
-	for i in `seq 1 $1`; do
-		for j in `seq 1 $2`; do
-			mezera="X"
-			eval policko$i_$j="x"
-		done
-	done
-	echo $policko1_2
+#IFS=""
+
+
+switchSymbol(){
+	if [ $hrac == "X" ]; then
+		hrac="O"
+	else
+		hrac="X"
+	fi
 }
 
 radekHvezdicek() {
@@ -27,13 +27,24 @@ radekHvezdicek() {
 }
 
 getPolicko() {
-#	printf "${policko$1_$2}"
-	tmp="policko$1_$2"
+
+#	tmp="policko$1_$2"
+#	vysledek="$(eval echo "\$$tmp")"
+	vysledek="$(eval echo "\$policko$1_$2")"
 	
-	vysledek="$(eval echo "\$$tmp")"
-	
-#	printf "$(eval echo "\$$tmp")"
-	printf ${vysledek:-" "}
+	tmp=${vysledek:-" "}
+	if [ $hracX == $1 -a $hracY == $2 ]; then
+		printf "\033[41m$tmp\033[0m\n"
+	else
+		printf "$tmp"
+	fi
+
+}
+
+checkFreePlace() {
+#TODO
+#	if [ 
+	return 0
 }
 
 printPlocha() {
@@ -50,28 +61,41 @@ printPlocha() {
 
 
 # main loop
-init 10 10
-#clear
+stty -echo
+clear
 printPlocha
 while read -rn1 znak; do
-	clear
-	printPlocha
 	case $znak in
 		"Q"|"q"*)
+			stty echo
 			exit 0
 		;;
 		"D"|"d"*)
 			echo "šipka vpravo"
-			exit 0
+			hracY=$((hracY+1))
 		;;
 		"A"|"a"*)
 			echo "šipka doleva"
+			hracY=$((hracY-1))
 		;;
 		"W"|"w"*)
 			echo "šipka nahoru"
+			hracX=$((hracX-1))
 		;;
 		"S"|"s"*)
 			echo "šipka dolů"
+			hracX=$((hracX+1))
+		;;
+		" "|"b"*)
+			echo "mezernik"
+			if checkFreePlace $hracX $hracY; then
+				eval "policko$hracX""_$hracY"="$hrac"
+				switchSymbol
+				checkWin $hracX $hracY
+			fi
 		;;
 	esac
+	clear
+	printPlocha
 done
+stty echo
