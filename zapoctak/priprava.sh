@@ -1,5 +1,10 @@
 #!/bin/sh
 
+FOREGROUND_COLOR="\033[94m"
+BCK_COLOR="\033[40m"
+O_FOREGROUND_COLOR="\\033[32m"
+X_FOREGROUND_COLOR="\\033[33m"
+
 sirka=8
 vyska=8
 
@@ -8,8 +13,54 @@ hracY=1
 
 hrac="X"
 
+pocetPiskvorek=4
+
 #IFS=""
 
+
+pocetPolicekNaDiagonale(){
+	# $1, $2 - pozice
+	# $3, $4 - směrový vektor
+	# $5 - 1 - s rekurzí, 0 bez
+	# vrátí počet políček v diagonále
+
+	znak="$(eval echo "\$policko$1_$2")"
+
+	x=$(($1+$3))
+	y=$(($2+$4))
+
+	inc=0
+
+	while [ "$(eval echo "\$policko$x_$y")" == $znak ]; do
+		inc=$(($inc+1))
+		x=$(($x+$3))
+		y=$(($y+$4))
+	done
+	
+	if [[ $5 == 1 ]]; then
+		druhaStrana=`pocetPolicekNaDiagonale $1 $2 $((-1*$3)) $((-1*$4)) 0`
+		return $(($inc+$druhaStrana+1))
+	else
+		return $inc
+	fi
+}
+
+checkWin(){
+	# $1 - políčko X,	$2 - políčko Y
+	# $3 - počet
+	p1=`pocetPolicekNaDiagonale $1 $2 -1 0 1`
+	p2=`pocetPolicekNaDiagonale $1 $2 -1 -1 1`
+	p3=`pocetPolicekNaDiagonale $1 $2 0 -1 1`
+	p4=`pocetPolicekNaDiagonale $1 $2 1 -1 1`
+
+	nejvyssi=`printf "%d\n%d\n%d\n%d\n" "$p1" "$p2" "$p3" "$p4" | sort -r | head -n 1`
+
+	if [ $nejvyssi -ge $3 ]; then
+		return $nejvyssi
+	else
+		return 0
+	fi
+}
 
 switchSymbol(){
 	if [ $hrac == "X" ]; then
@@ -26,25 +77,34 @@ radekHvezdicek() {
 	printf "\n"
 }
 
-getPolicko() {
-
-#	tmp="policko$1_$2"
-#	vysledek="$(eval echo "\$$tmp")"
+printPolicko() {
 	vysledek="$(eval echo "\$policko$1_$2")"
 	
 	tmp=${vysledek:-" "}
 	if [ $hracX == $1 -a $hracY == $2 ]; then
-		printf "\033[41m$tmp\033[0m\n"
-	else
-		printf "$tmp"
+		printf "\033[41m"
 	fi
-
+	
+	if [[ $tmp == "O" ]]; then
+		printf "$O_FOREGROUND_COLOR$tmp$FOREGROUND_COLOR$BCK_COLOR"
+	elif [[ $tmp == "X" ]]; then
+		printf "$X_FOREGROUND_COLOR$tmp$FOREGROUND_COLOR$BCK_COLOR"
+	else
+		printf "$tmp$FOREGROUND_COLOR$BCK_COLOR"
+	fi
 }
 
 checkFreePlace() {
-#TODO
-#	if [ 
-	return 0
+	znakPolicko="$(eval echo "\$policko$1_$2")"
+	echo \"$znakPolicko\"
+	if [ $znakPolicko="X" -o $znakPolicko="O" ]; then
+		echo 1
+		echo $znakPolicko
+		return 1
+	else
+		echo 0
+		return 0
+	fi
 }
 
 printPlocha() {
@@ -52,7 +112,7 @@ printPlocha() {
 	for i in `seq 1 $vyska`; do
 		# řádek
 		for j in `seq 1 $sirka`; do
-			printf "* `getPolicko $i $j` "
+			printf "* `printPolicko $i $j` "
 		done
 		printf "*\n"
 		radekHvezdicek $((4*$sirka+1))
@@ -62,6 +122,7 @@ printPlocha() {
 
 # main loop
 stty -echo
+printf $BCK_COLOR$FOREGROUND_COLOR
 clear
 printPlocha
 while read -rn1 znak; do
@@ -91,11 +152,12 @@ while read -rn1 znak; do
 			if checkFreePlace $hracX $hracY; then
 				eval "policko$hracX""_$hracY"="$hrac"
 				switchSymbol
-				checkWin $hracX $hracY
+				winVysledek=`checkWin $hracX $hracY $pocetPiskvorek`
+				echo $winVysledek
 			fi
 		;;
 	esac
-	clear
+	#clear
 	printPlocha
 done
 stty echo
