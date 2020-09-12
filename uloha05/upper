@@ -1,0 +1,37 @@
+#!/bin/sh
+
+list=($(ls -l | awk 'NR != 1 {print $9}'))
+
+#echo ${list[0]}
+
+recognize(){
+	if [[ ${list[0]} == `echo "${list[0]}" | ggrep -Pe "^([^[:lower:]])+$"` ]]; then
+		if [[ $2 == "r" ]]; then
+			echo "return =r"
+			return 0
+		fi
+		echo "velka pismena"
+		newName=`echo "$1" | awk '{print tolower($0)}'`
+	elif [[ ${list[0]} == `echo "${list[0]}" | ggrep -Pe "^([^[:upper:]])+$"` ]] && [[ "$2" = "r" ]]; then
+		if [[ $2 != "r" ]]; then 
+			echo "return !r"
+			return 0
+		 fi
+		echo "mala pismena"
+		newName=`echo "$1" | awk '{print toupper($0)}'`		
+	else
+		return 0
+	fi
+	
+	if [ -f $newName ]; then
+    		echo the file exists
+	else
+		mv $1 $newName
+	fi
+	
+	echo $newName
+	
+	return 0
+}
+
+echo `recognize ${list[0]} n`
