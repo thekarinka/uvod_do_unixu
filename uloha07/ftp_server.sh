@@ -148,6 +148,21 @@ serve() {
 					echo "500 Unrecognized TYPE command"
 				fi
 				;;
+			RETR)
+				if [ $nc_pid -eq 0 ]; then
+					echo "425 Use PORT or PASV first"
+				else
+					echo "150 Here comes the file"
+					cat "$ARGS">&4
+					echo "226 File send OK"
+					exec 3<&- 4>&-
+					rm "$FIFO_IN" "$FIFO_OUT"
+					port=0
+					kill $nc_pid
+					wait $nc_pid
+					nc_pid=0
+				fi
+				;;
 			LIST)
 				if [ $nc_pid -eq 0 ]; then
 					echo "425 Use PORT or PASV first"
