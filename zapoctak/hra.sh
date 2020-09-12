@@ -7,16 +7,11 @@ X_FOREGROUND_COLOR="\\033[33m"
 
 sirka=8
 vyska=8
-
+pocetPiskvorek=4
 hracX=1
 hracY=1
 
 hrac="X"
-
-pocetPiskvorek=4
-
-#IFS=""
-
 
 pocetPolicekNaDiagonale(){
 	# $1, $2 - pozice
@@ -31,35 +26,30 @@ pocetPolicekNaDiagonale(){
 
 	inc=0
 
-	while [ "$(eval echo "\$policko$x_$y")" == $znak ]; do
+	while [ "$(eval echo "\$policko"$x"_"$y"")" == $znak ]; do
 		inc=$(($inc+1))
 		x=$(($x+$3))
 		y=$(($y+$4))
 	done
-	
-	if [[ $5 == 1 ]]; then
+
+	if [ $5 == "1" ]; then
 		druhaStrana=`pocetPolicekNaDiagonale $1 $2 $((-1*$3)) $((-1*$4)) 0`
-		return $(($inc+$druhaStrana+1))
+		v=$(($inc+$druhaStrana+1))
+		echo $v
 	else
-		return $inc
+		echo $inc
 	fi
 }
 
 checkWin(){
 	# $1 - políčko X,	$2 - políčko Y
-	# $3 - počet
 	p1=`pocetPolicekNaDiagonale $1 $2 -1 0 1`
 	p2=`pocetPolicekNaDiagonale $1 $2 -1 -1 1`
 	p3=`pocetPolicekNaDiagonale $1 $2 0 -1 1`
 	p4=`pocetPolicekNaDiagonale $1 $2 1 -1 1`
-
 	nejvyssi=`printf "%d\n%d\n%d\n%d\n" "$p1" "$p2" "$p3" "$p4" | sort -r | head -n 1`
-
-	if [ $nejvyssi -ge $3 ]; then
-		return $nejvyssi
-	else
-		return 0
-	fi
+	
+	echo $nejvyssi
 }
 
 switchSymbol(){
@@ -96,13 +86,11 @@ printPolicko() {
 
 checkFreePlace() {
 	znakPolicko="$(eval echo "\$policko$1_$2")"
-	echo \"$znakPolicko\"
-	if [ $znakPolicko="X" -o $znakPolicko="O" ]; then
-		echo 1
-		echo $znakPolicko
+	x="X"
+	o="O"
+	if [ "$znakPolicko" = "$x" -o "$znakPolicko" = "$o" ]; then
 		return 1
 	else
-		echo 0
 		return 0
 	fi
 }
@@ -132,32 +120,40 @@ while read -rn1 znak; do
 			exit 0
 		;;
 		"D"|"d"*)
-			echo "šipka vpravo"
+			#echo "šipka vpravo"
 			hracY=$((hracY+1))
 		;;
 		"A"|"a"*)
-			echo "šipka doleva"
+			#echo "šipka doleva"
 			hracY=$((hracY-1))
 		;;
 		"W"|"w"*)
-			echo "šipka nahoru"
+			#echo "šipka nahoru"
 			hracX=$((hracX-1))
 		;;
 		"S"|"s"*)
-			echo "šipka dolů"
+			#echo "šipka dolů"
 			hracX=$((hracX+1))
 		;;
 		" "|"b"*)
-			echo "mezernik"
+			#echo "mezernik"
 			if checkFreePlace $hracX $hracY; then
 				eval "policko$hracX""_$hracY"="$hrac"
+				winVysledek=`checkWin $hracX $hracY`
+				if [ $winVysledek -ge $pocetPiskvorek ]; then
+					clear
+					printPlocha
+					echo "Vyhrál hráč s $hrac"
+					echo "Stiskněte Enter"
+					read
+					stty echo
+					exit 0
+				fi
 				switchSymbol
-				winVysledek=`checkWin $hracX $hracY $pocetPiskvorek`
-				echo $winVysledek
 			fi
 		;;
 	esac
-	#clear
+	clear
 	printPlocha
 done
 stty echo
